@@ -7,9 +7,11 @@ import os
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
-    __file__))))
+        __file__))))
 
-with open(BASE_DIR + '/pytest/settings/secrets.json') as f:
+SETTINGS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(SETTINGS_DIR, 'secrets.json')) as f:
     secrets = json.loads(f.read())
 
 
@@ -20,6 +22,7 @@ def get_secret(setting, secrets=secrets):
     except KeyError:
         error_msg = 'Set the {0} environment variable'.format(setting)
         raise ImproperlyConfigured(error_msg)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -34,14 +37,16 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = ('django.contrib.admin',
-                  'django.contrib.auth',
-                  'django.contrib.contenttypes',
-                  'django.contrib.sessions',
-                  'django.contrib.messages',
-                  'django.contrib.staticfiles',
-                  'testapp',
-                  'tgmbot', )
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'testapp',
+    'tgmbot',
+)
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,7 +56,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware', )
+    'django.middleware.security.SecurityMiddleware',
+)
 
 ROOT_URLCONF = 'pytest.urls'
 
@@ -99,9 +105,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
 
