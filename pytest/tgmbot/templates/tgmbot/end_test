@@ -1,0 +1,10 @@
+{% if additional_text %}
+    {{ additional_text }}
+{% endif %}
+Тест завершен.
+Общее количество вопросов: {{ result.total_questions }}
+Задано вопросов: {{ result.asked_questions }}
+Правильных ответов: {{ result.right_answers}}
+
+/tests - выбрать новый тест
+/help - помощь

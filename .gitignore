@@ -1,0 +1,2 @@
+*.py[cod]
+pytest/pytest/settings/secrets.json
