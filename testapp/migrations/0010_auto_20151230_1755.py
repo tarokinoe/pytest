@@ -2,11 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from django.db import models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('testapp', '0009_auto_20151230_1717'), ]
 
     operations = [

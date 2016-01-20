@@ -3,7 +3,6 @@
 import re
 
 from django.conf import settings
-from django.conf.urls import include
 from django.conf.urls import url
 from django.views.decorators.csrf import csrf_exempt
 

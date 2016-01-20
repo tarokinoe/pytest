@@ -1,8 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from django.contrib import admin
-
-from .models import Answer, Game, GameQuestion, \
+from testapp.models import Answer, Game, GameQuestion, \
     Player, Question, Test, TestQuestion
 
 

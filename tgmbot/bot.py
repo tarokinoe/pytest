@@ -7,12 +7,7 @@ from django.db.models import Count
 from django.template.loader import render_to_string
 from telebot import types
 from testapp.exceptions import OpenGameAlreadyExists
-from testapp.models import Answer
-from testapp.models import Game
-from testapp.models import GameQuestion
-from testapp.models import Player
-from testapp.models import Question
-from testapp.models import Test
+from testapp.models import Game, Player, Test
 
 bot = telebot.TeleBot(settings.TGM_BOT_TOKEN)
 

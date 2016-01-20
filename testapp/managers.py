@@ -7,14 +7,14 @@ from testapp.exceptions import OpenGameAlreadyExists
 
 class GameManager(models.Manager):
     def create_game(self, player, test):
-        #open_games = self.open_games(player=player)
+        # open_games = self.open_games(player=player)
         open_games = player.current_game()
         if open_games:
             raise OpenGameAlreadyExists
         else:
             return self.create(player=player, test=test)
-    # def open_games(self, player):
-    #    return self.filter(player=player).filter(state=self.model.OPEN)
+            # def open_games(self, player):
+            # return self.filter(player=player).filter(state=self.model.OPEN)
 
 
 class PlayerManager(models.Manager):

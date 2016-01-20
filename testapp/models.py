@@ -1,9 +1,8 @@
 # -*- encoding: utf-8 -*-
 
 from django.db import models
-from django.db.models import F
 from django.utils import timezone
-from managers import GameManager, \
+from testapp.managers import GameManager, \
     GameQuestionManager, PlayerManager, TestManager
 
 
