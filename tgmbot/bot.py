@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
-import telebot
-from telebot import types
-
-from django.conf import settings
-from testapp.models import Test, Player, Game, GameQuestion, Answer, Question
-
-from testapp.exceptions import OpenGameAlreadyExists
 import re
+
+import telebot
+from django.conf import settings
 from django.db.models import Count
 from django.template.loader import render_to_string
+from telebot import types
+from testapp.exceptions import OpenGameAlreadyExists
+from testapp.models import Answer
+from testapp.models import Game
+from testapp.models import GameQuestion
+from testapp.models import Player
+from testapp.models import Question
+from testapp.models import Test
 
 bot = telebot.TeleBot(settings.TGM_BOT_TOKEN)
 
@@ -43,16 +47,15 @@ def status(message):
 
 
 @bot.message_handler(commands=['tests'])
-def list_test(message):    
-    test_list = Test.objects.filter(published=True).annotate(Count('questions'))
-    text = render_to_string('tgmbot/test_list', 
-        {'test_list' : test_list}
-    )
+def list_test(message):
+    test_list = Test.objects.filter(
+        published=True).annotate(Count('questions'))
+    text = render_to_string('tgmbot/test_list', {'test_list': test_list})
     msg = bot.send_message(message.chat.id, text, parse_mode='Markdown')
-        
+
 
 @bot.message_handler(regexp=r"^/test_[\d]+$")
-def start_test(message):    
+def start_test(message):
     match = re.search(r"test_([\d]+)", message.text)
     if match:
         test_id = match.group(1)
@@ -66,8 +69,8 @@ def start_test(message):
             game = Game.manager.create_game(player=player, test=test)
         except OpenGameAlreadyExists:
             bot.send_message(message.chat.id,
-                render_to_string('tgmbot/openGameAlreadyExists', {})
-            )
+                             render_to_string('tgmbot/openGameAlreadyExists',
+                                              {}))
             return
         next_question(message, game=game)
 
@@ -79,8 +82,10 @@ def next_question(message, game=None, additional_text=''):
         game = player.current_game()
         if game is None:
             markup = types.ReplyKeyboardHide()
-            bot.send_message(message.chat.id, 
-            u"Вы не начинали тестирование. Отпраьте /tests, чтобы выбрать тест", reply_markup=markup)
+            bot.send_message(
+                message.chat.id,
+                u"Вы не начинали тестирование. Отпраьте /tests, чтобы выбрать тест",
+                reply_markup=markup)
             return
     question, option_list, number = game.next_question()
     if question:
@@ -93,16 +98,16 @@ def next_question(message, game=None, additional_text=''):
         markup = types.ReplyKeyboardMarkup(row_width=2)
         markup.add(*list([letter.upper() for letter, option in option_list]))
         markup.row('/stop Завершить тест', '/next Следущий вопрос')
-        bot.send_message(message.chat.id, text, reply_markup=markup)        
+        bot.send_message(message.chat.id, text, reply_markup=markup)
     else:
         markup = types.ReplyKeyboardHide()
         result = game.result()
-        text = render_to_string('tgmbot/end_test', {            
+        text = render_to_string('tgmbot/end_test', {
             'additional_text': additional_text,
             'result': result,
         })
         bot.send_message(message.chat.id, text, reply_markup=markup)
-            
+
 
 @bot.message_handler(commands=['stop'])
 def stop_test(message):
@@ -111,9 +116,7 @@ def stop_test(message):
     if game:
         game.stop()
         result = game.result()
-        text = render_to_string('tgmbot/end_test', {
-            'result': result,    
-        })
+        text = render_to_string('tgmbot/end_test', {'result': result, })
         markup = types.ReplyKeyboardHide()
         bot.send_message(message.chat.id, text, reply_markup=markup)
 
@@ -131,9 +134,13 @@ def player_answer_handler(message):
         if game_question:
             result = game_question.reply(answer.lower())
             if result:
-                next_question(message, game=game, additional_text=u'\U0001f44d Правильно!')
+                next_question(message,
+                              game=game,
+                              additional_text=u'\U0001f44d Правильно!')
             else:
-                next_question(message, game=game, additional_text=u'\U0001f614 Неверно.')
+                next_question(message,
+                              game=game,
+                              additional_text=u'\U0001f614 Неверно.')
         else:
             return
 
@@ -141,7 +148,6 @@ def player_answer_handler(message):
 @bot.message_handler(commands=['info'])
 def info(message):
     user = message.from_user
-    bot.send_message(message.chat.id, 'user_id: %s, %s, %s, %s, chat_id: %s' % 
-        (user.id, user.first_name, user.last_name, 
-        user.username, message.chat.id)
-    )
+    bot.send_message(message.chat.id, 'user_id: %s, %s, %s, %s, chat_id: %s' %
+                     (user.id, user.first_name, user.last_name, user.username,
+                      message.chat.id))
