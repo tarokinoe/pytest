@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 class TestAppError(Exception):
     def __str__(self):
         return 'Error in test application'

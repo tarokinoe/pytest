@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 from django.db import models
 from django.db.models import F
 from testapp.exceptions import OpenGameAlreadyExists

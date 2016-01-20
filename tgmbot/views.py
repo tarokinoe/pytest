@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 import telebot
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
