@@ -1,0 +1,99 @@
+{% load static %}
+
+
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}"{% if LANGUAGE_BIDI %} dir="rtl"{% endif %}>
+<head>
+
+    <!-- meta -->
+    <meta charset="utf-8">
+    <meta name="keywords" content="{% block meta_keywords %}{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="description" content="{% block meta_description %}{% endblock %}">
+    <title>
+        {% block meta_title %}{% endblock %}{% if settings.SITE_TITLE %} | {{ settings.SITE_TITLE }}{% endif %}
+    </title>
+    <link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.7/css/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.7/css/ripples.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block head_css %}{% endblock head_css %}
+
+    {% block extra_css %}{% endblock %}
+
+
+
+    {% block head_js %} {% endblock head_js %}
+    {% block extra_js %}{% endblock %}
+
+    <!--[if lt IE 9]>
+        <script src="{% static "js/html5shiv.js" %}"></script>
+        <script src="{% static "js/respond.min.js" %}"></script>
+        <![endif]-->
+
+
+    {% block extra_head %}{% endblock %}
+
+</head>
+
+<body id="{% block body_id %}body{% endblock %}" class="{% block body_class %}body-site{% endblock %}">
+
+
+{% block nav %}
+    {% include "blocks/nav.html" %}
+{% endblock nav %}
+
+
+<main class="content">
+
+    {% block content_tag %}
+        {% block nav_block %}
+            <div class="container">
+                {% include 'blocks/nav_block.html' %}
+            </div>
+        {% endblock nav_block %}
+
+
+        <div class="{% block container_class %}container{% endblock container_class %}">
+            <div class="row">
+                {% block body %}
+
+                {% endblock body %}
+            </div>
+        </div>
+    {% endblock content_tag %}
+</main>
+
+
+<footer class="{% block footer_class %}footer-distributed container{% endblock footer_class %}">
+
+    {% include 'blocks/footer.html' %}
+
+</footer>
+
+
+
+{% block footer_js %}
+    {% include 'blocks/footer_js.html' %}
+{% endblock footer_js %}
+
+{% block extra_footer_js %}
+
+{% endblock extra_footer_js %}
+
+
+</body>
+</html>

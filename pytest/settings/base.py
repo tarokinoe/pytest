@@ -29,7 +29,7 @@ def get_secret(setting, secrets=secrets):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'x%_u_thw2(q-@clt0=*w2t4f*25_w3e1--a=m8^bg8*bsxf8w!'
-
+SITE_TITLE = 'Python тесты'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'pytest.settings_context.settings_context_processor'
             ],
         },
     },
@@ -106,7 +107,17 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'gen_static')
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
 
 # Security
 SECURE_CONTENT_TYPE_NOSNIFF = True
