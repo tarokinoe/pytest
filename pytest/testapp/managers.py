@@ -1,18 +1,15 @@
 from django.db import models
 from django.db.models import F
-from testapp.exceptions import OpenGameAlreadyExists
+from testapp.exceptions import OpenGameAlreadyExists, TestIsNotAvailable
 
 
 class GameManager(models.Manager):
-    def create_game(self, player, test):
-        #open_games = self.open_games(player=player)
+    def create_game(self, player, test):        
         open_games = player.current_game()
         if open_games:
-            raise OpenGameAlreadyExists
-        else:
-            return self.create(player=player, test=test)
-    #def open_games(self, player):
-    #    return self.filter(player=player).filter(state=self.model.OPEN)
+            raise OpenGameAlreadyExists        
+        test.check_availability(player=player)
+        return self.create(player=player, test=test)
 
 
 class PlayerManager(models.Manager):

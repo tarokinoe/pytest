@@ -5,7 +5,7 @@ from telebot import types
 from django.conf import settings
 from testapp.models import Test, Player, Game, GameQuestion, Answer, Question
 
-from testapp.exceptions import OpenGameAlreadyExists
+from testapp.exceptions import OpenGameAlreadyExists, TestIsNotAvailable
 import re
 from django.db.models import Count
 from django.template.loader import render_to_string
@@ -67,6 +67,12 @@ def start_test(message):
         except OpenGameAlreadyExists:
             bot.send_message(message.chat.id,
                 render_to_string('tgmbot/openGameAlreadyExists', {})
+            )
+            return
+        except TestIsNotAvailable as e:
+            bot.send_message(message.chat.id,
+                render_to_string('tgmbot/TestIsNotAvailable',
+                {"available_time": e.available_time})
             )
             return
         next_question(message, game=game)

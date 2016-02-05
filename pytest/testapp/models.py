@@ -1,8 +1,11 @@
 from django.db import models
 from django.db.models import F
 from django.utils import timezone
+from datetime import timedelta
 
 from managers import GameManager, PlayerManager, TestManager, GameQuestionManager
+from exceptions import TestIsNotAvailable
+
 
 def gen_letter():
     import string
@@ -39,8 +42,33 @@ class Test(models.Model):
     published = models.BooleanField("is published", default=False)
     author = models.CharField("Author", max_length=200, blank=True)
     description = models.CharField("Description", max_length=2000, blank=True)
+    interval = models.PositiveIntegerField("Retake interval in seconds", default=0)
     objects = models.Manager()
     manager = TestManager()
+
+    def get_interval(self):
+        tdelta = timedelta(seconds=self.interval)
+        result = {"day": tdelta.days}
+        result["hour"], rem = divmod(tdelta.seconds, 3600)
+        result["minute"], result["second"] = divmod(rem, 60)
+        return result
+        
+    def check_availability(self, player):
+        if not self.published:
+            raise TestIsNotAvailable()
+        last_game = self.games.filter(player=player).order_by("-start_on").first()
+        if not last_game:
+            return True
+        if last_game.state == Game.OPEN:
+            raise TestIsNotAvailable()
+        interval = timedelta(seconds=self.interval)
+        available_time = last_game.stop_on + interval
+        if timezone.now() > available_time:
+            return True
+        else:
+            raise TestIsNotAvailable(available_time=available_time)
+
+
     def __unicode__(self):
         return u"%s" % (self.name)
 
@@ -53,6 +81,7 @@ class Player(models.Model):
     tests = models.ManyToManyField(Test, through='Game')
     objects = models.Manager()
     manager = PlayerManager()
+
     def stop_game(self):
         games = self.games.filter(state=Game.OPEN)
         for game in games:
@@ -67,7 +96,7 @@ class Player(models.Model):
             return self.games.get(state=Game.OPEN)
         except Game.DoesNotExist:
             return None
-        except MultipleObjectsReturned:
+        except Game.MultipleObjectsReturned:
             return self.games.filter(state=Game.OPEN).order_by('-start_on').first()
             
 
@@ -102,7 +131,7 @@ class Game(models.Model):
         (CLOSE, 'Close game'),
     )
     player = models.ForeignKey("Player", related_name='games')
-    test = models.ForeignKey('Test')
+    test = models.ForeignKey('Test', related_name='games')
     start_on = models.DateTimeField("when was started", auto_now_add=True)
     stop_on = models.DateTimeField("when was stoped", null=True, blank=True)
     questions = models.ManyToManyField("Question", through='GameQuestion')
