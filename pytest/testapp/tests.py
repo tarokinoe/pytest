@@ -37,3 +37,22 @@ class TestTestCase(TestCase):
         game = Game.manager.create_game(player=player, test=test)
         with self.assertRaises(TestIsNotAvailable):
             test.check_availability(player=player)
+
+
+class TestResultCase(TestCase):
+    def setUp(self):
+        pass
+    def test_calculate_score(self):
+        """if zero number of questions in test, score is zero"""
+        pass
+
+
+class TestResultViewCase(TestCase):
+    def setUp(self):
+        pass
+    def test_score_method(self):
+        """if zero number of questions in test, score is zero"""
+        pass    
+    def test_if_unpublished_test(self):
+        """"""
+        pass

@@ -1,9 +1,10 @@
+from __future__ import division
 from django.db import models
 from django.db.models import F
 from django.utils import timezone
 from datetime import timedelta
-
-from managers import GameManager, PlayerManager, TestManager, GameQuestionManager
+from sql import create_testapp_resultview
+from managers import GameManager, PlayerManager, TestManager, GameQuestionManager, ResultViewManager
 from exceptions import TestIsNotAvailable
 
 
@@ -12,6 +13,12 @@ def gen_letter():
     alphabet = string.ascii_lowercase
     for char in alphabet:
         yield char
+
+
+def calculate_result_score(total_questions, right_answers):
+    if total_questions == 0:
+        return 0
+    return round((right_answers / total_questions) * 5, 2)
 
 
 class Question(models.Model):
@@ -98,10 +105,27 @@ class Player(models.Model):
             return None
         except Game.MultipleObjectsReturned:
             return self.games.filter(state=Game.OPEN).order_by('-start_on').first()
-            
+
+    def get_rating(self):
+        rating = []
+        all_result = ResultView.objects.all()
+        player_result_list = [ 
+            result for result in all_result if result.player == self 
+        ]
+        for player_result in player_result_list:
+            worse_result = 0
+            all_test_result = [ res for res in all_result if res.test == player_result.test ]
+            for result in all_test_result:
+                if result.score() < player_result.score():
+                    worse_result += 1
+            rating.append((
+                player_result,
+                round((worse_result / len(all_test_result)) * 100, 2)))
+        return rating
+
 
     def __unicode__(self):
-        return u"%s" % self.tgm_user_id
+        return u"%s, %s, %s, %s" % (self.tgm_user_id, self.tgm_last_name, self.tgm_first_name, self.tgm_user_name)
 
 
 class TestQuestion(models.Model):
@@ -138,6 +162,7 @@ class Game(models.Model):
     state = models.CharField("Game state", choices=STATE, max_length=10, default=OPEN)
     objects = models.Manager()
     manager = GameManager()
+
     def stop(self):
         if self.state == Game.OPEN:
             self.state = Game.CLOSE
@@ -187,8 +212,11 @@ class Game(models.Model):
             'state': self.state,
             'total_questions': self.test.questions.filter(published=True).count(),
             'asked_questions': self.game_questions.count(),
-            'right_answers': GameQuestion.objects.right_answers(game=self).count(),
+            'right_answers': GameQuestion.objects.right_answers(game=self).count(),            
         }
+        result['score'] = calculate_result_score(
+            result['total_questions'], result['right_answers']
+        )
         return result
 
     def __unicode__(self):
@@ -227,3 +255,32 @@ class GameQuestion(models.Model):
 
     def __unicode__(self):
         return u"%s, %s" % (self.game, self.question)
+
+
+class ResultView(models.Model):
+    """Model presenting "testapp_result" postgresql view"""
+    SQL = create_testapp_resultview    
+    class Meta:
+        managed = False        
+    id = models.PositiveIntegerField(primary_key=True)    
+    player = models.ForeignKey(Player)
+    test = models.ForeignKey(Test)
+    test_name = models.CharField("Test name", max_length=200)
+    number_of_questions = models.PositiveIntegerField()
+    number_of_right_answers = models.PositiveIntegerField()
+    objects = ResultViewManager()
+
+    def score(self):
+        return calculate_result_score(
+            self.number_of_questions, 
+            self.number_of_right_answers
+        )
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def save(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+

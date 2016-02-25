@@ -3,7 +3,7 @@ import telebot
 from telebot import types
 
 from django.conf import settings
-from testapp.models import Test, Player, Game, GameQuestion, Answer, Question
+from testapp.models import Test, Player, Game, GameQuestion, Answer, Question, ResultView
 
 from testapp.exceptions import OpenGameAlreadyExists, TestIsNotAvailable
 import re
@@ -103,12 +103,27 @@ def next_question(message, game=None, additional_text=''):
     else:
         markup = types.ReplyKeyboardHide()
         result = game.result()
+        rating = ResultView.objects.get_rating(player=game.player, test=game.test)[1]
         text = render_to_string('tgmbot/end_test', {            
             'additional_text': additional_text,
             'result': result,
+            'rating': rating,
         })
         bot.send_message(message.chat.id, text, reply_markup=markup)
             
+
+@bot.message_handler(commands=['stat'])
+def stat(message):
+    player = get_or_create_player(message)
+    rating_list = player.get_rating()
+    if rating_list:
+        text = render_to_string('tgmbot/statistics', {            
+                'rating_list': rating_list,
+            })
+    else:
+        text = "Ваши результаты не найдены"
+    bot.send_message(message.chat.id, text, parse_mode='HTML')
+
 
 @bot.message_handler(commands=['stop'])
 def stop_test(message):
@@ -117,8 +132,10 @@ def stop_test(message):
     if game:
         game.stop()
         result = game.result()
+        rating = ResultView.objects.get_rating(player=game.player, test=game.test)[1]
         text = render_to_string('tgmbot/end_test', {
-            'result': result,    
+            'result': result, 
+            'rating': rating,   
         })
         markup = types.ReplyKeyboardHide()
         bot.send_message(message.chat.id, text, reply_markup=markup)
