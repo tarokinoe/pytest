@@ -1,5 +1,5 @@
-# pytest
-Telegram bot, who can test you.
-Bot available by https://telegram.me/PyTest_Bot
+# Telegram quiz bot
+### Demo
+[PyQuiz](https://telegram.me/PyTest_Bot)  - telegram bot with python quiz 
 
 
