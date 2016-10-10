@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from .models import Test, Question, Answer, TestQuestion, Player, Game, GameQuestion
 
@@ -21,7 +22,22 @@ class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 1
 
+
+class QuestionAdminForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        widgets = {
+            'text': forms.Textarea(),
+        }
+        fields = [
+            'text',
+            'published',
+            'qtype',
+        ]
+
+
 class QuestionAdmin(admin.ModelAdmin):
+    form = QuestionAdminForm
     list_display = ('text',)
     inlines = [
         AnswerInline,
